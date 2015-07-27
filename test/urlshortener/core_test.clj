@@ -2,6 +2,35 @@
   (:require [clojure.test :refer :all]
             [urlshortener.core :refer :all]))
 
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
+(deftest test-int-to-mod-list
+  (testing "int-to-mod-list-returns-list-of-modulos"
+    (is (= [2 1]
+           (int-to-mod-list 125 62)))))
+
+(deftest test-int-to-char
+  (testing "single digit returns digit"
+    (is (and (= \9
+                (int-to-char 9))
+             (= \0
+                (int-to-char 0)))))
+  (testing "between 10 and 35 return uppercase char"
+        (is (and (= \A
+                (int-to-char 10))
+             (= \Z
+                (int-to-char 35)))))
+  (testing "between 36 and 61 return lowercase char"
+        (is (and (= \a
+                (int-to-char 36))
+             (= \z
+                (int-to-char 61)))))
+  (testing "lower than 0 throws exception"
+        (is (thrown? Exception
+               (int-to-char -1))))
+  (testing "higher than 61 throws exception"
+        (is (thrown? Exception
+               (int-to-char 62)))))
+
+(deftest test-int-to-base62
+  (testing "converts int to base62 string"
+    (is (= "21"
+           (int-to-base62 125)))))
