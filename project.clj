@@ -6,5 +6,6 @@
     :main urlshortener.core
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/data.codec "0.1.0"]
-                 [org.clojure/math.numeric-tower "0.0.4"]]
+                 [org.clojure/math.numeric-tower "0.0.4"]
+                 [com.taoensso/carmine "2.11.1"]]
   :profiles {:dev {:plugins [[com.jakemccrary/lein-test-refresh "0.7.0"]]}})

@@ -1,5 +1,6 @@
 (ns urlshortener.core
-  (:require [clojure.math.numeric-tower :as math]))
+  (:require [clojure.math.numeric-tower :as math]
+            [taoensso.carmine :as car :refer (wcar)]))
 
 (defn long-to-mod-list [x m]
   (if (= 0 x)
@@ -15,6 +16,8 @@
 (def DIGIT_OFFSET 48)
 (def LOWERCASE_OFFSET 61)
 (def UPPERCASE_OFFSET 55)
+
+(defmacro wcar* [& body] `(car/wcar {:pool {} :spec {}} ~@body))
 
 (defn is-digit? [c]
   (let [zero (long \0)
@@ -47,3 +50,18 @@
 
 (defn dehydrate [x]
   (clojure.string/join "" (map long-to-char (long-to-mod-list x 62))))
+
+(defn get-and-inc-id []
+  (wcar* (car/incr "next-key")))
+
+(defn persist-url [short-url long-url]
+  (wcar* (car/set short-url long-url)))
+
+(defn retrieve-url [short-url]
+  (wcar* (car/get short-url)))
+
+(defn shorten [long-url]
+  (let [id (get-and-inc-id)
+        short-url (dehydrate id)]
+    (persist short-url long-url)
+    short-url))
