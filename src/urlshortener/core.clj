@@ -55,13 +55,13 @@
   (wcar* (car/incr "next-key")))
 
 (defn persist-url [short-url long-url]
-  (wcar* (car/set short-url long-url)))
+  (wcar* (car/hset (str "url:" short-url) "name" long-url)))
 
 (defn retrieve-url [short-url]
-  (wcar* (car/get short-url)))
+  (:name (wcar* (car/hget (str "url:" short-url)))))
 
 (defn shorten [long-url]
   (let [id (get-and-inc-id)
         short-url (dehydrate id)]
-    (persist short-url long-url)
+    (persist-url short-url long-url)
     short-url))
