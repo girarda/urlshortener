@@ -58,7 +58,7 @@
   (wcar* (car/hset (str "url:" short-url) "name" long-url)))
 
 (defn retrieve-url [short-url]
-  (:name (wcar* (car/hget (str "url:" short-url)))))
+  (wcar* (car/hget (str "url:" short-url) "name")))
 
 (defn shorten [long-url]
   (let [id (get-and-inc-id)
