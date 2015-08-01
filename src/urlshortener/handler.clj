@@ -11,7 +11,8 @@
             [urlshortener.views.urlshort :as view]
             [ring.middleware.session :refer :all]
             [ring.middleware.anti-forgery :refer :all]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [hiccup.bootstrap.middleware :refer [wrap-bootstrap-resources]]))
 
 (defn handle-request [short-url]
   (let [url (retrieve-url short-url)]
@@ -37,4 +38,5 @@
   (GET "/:short-url" [short-url] (handle-request short-url))
   (route/not-found "Not Found"))
 
-(def app (wrap-defaults app-routes (assoc-in site-defaults [:security :anti-forgery] false)))
+(def app
+  (wrap-bootstrap-resources (wrap-defaults app-routes (assoc-in site-defaults [:security :anti-forgery] false))))

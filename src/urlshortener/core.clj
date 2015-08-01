@@ -62,7 +62,7 @@
   (let [id (get-and-inc-id)
             short-url (dehydrate id)]
         (persist-url short-url long-url)
-        short-url)
+        short-url))
 
 (defn retrieve-url [short-url]
   (wcar* (car/hget (str "url:" short-url) "name")))
