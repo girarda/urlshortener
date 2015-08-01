@@ -55,8 +55,9 @@
   (wcar* (car/incr "next-key")))
 
 (defn persist-url [short-url long-url]
-  (wcar* (car/hset (str "url:" short-url) "name" long-url))
-  (wcar* (car/hset "urls" long-url short-url)))
+  (dosync
+    (wcar* (car/hset (str "url:" short-url) "name" long-url))
+    (wcar* (car/hset "urls" long-url short-url))))
 
 (defn register-url [long-url]
   (let [id (get-and-inc-id)
