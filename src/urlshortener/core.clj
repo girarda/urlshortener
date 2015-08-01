@@ -58,10 +58,11 @@
   (wcar* (car/hset (str "url:" short-url) "name" long-url))
   (wcar* (car/hset "urls" long-url short-url)))
 
-(defn register-url [short-url long-url]
-  (let [persisted-url (wcar* (car/hget "urls" long-url))]
-    (if (nil? persisted-url)
-      (persist-url short-url))))
+(defn register-url [long-url]
+  (let [id (get-and-inc-id)
+            short-url (dehydrate id)]
+        (persist-url short-url long-url)
+        short-url)
 
 (defn retrieve-url [short-url]
   (wcar* (car/hget (str "url:" short-url) "name")))
@@ -69,8 +70,5 @@
 (defn shorten [long-url]
   (let [persisted-url (wcar* (car/hget "urls" long-url))]
     (if (nil? persisted-url)
-      (let [id (get-and-inc-id)
-            short-url (dehydrate id)]
-        (persist-url short-url long-url)
-        short-url)
+        (register-url long-url)
         persisted-url)))
