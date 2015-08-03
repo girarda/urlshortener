@@ -17,7 +17,8 @@
 (def LOWERCASE_OFFSET 61)
 (def UPPERCASE_OFFSET 55)
 
-(defmacro wcar* [& body] `(car/wcar {:pool {} :spec {}} ~@body))
+(defmacro wcar* [& body]
+  `(car/wcar {:pool {} :spec {}} ~@body))
 
 (defn is-digit? [c]
   (let [zero (long \0)
@@ -32,15 +33,6 @@
     (and (>= i (long \a)) (<= i (long \z))) (- i LOWERCASE_OFFSET)
     :else (throw Exception))))
 
-(defn saturate [base]
-  (loop [sum 0
-         reversed-base (reverse base)
-         exp 0]
-    (if (nil? reversed-base)
-      sum
-      (recur (+ sum (* (char-to-long (first reversed-base)) (math/expt BASE exp))) (next reversed-base) (inc exp))
-    )))
-
 (defn long-to-char [i]
   (char (cond
     (and (< i 10) (>= i 0)) (+ i DIGIT_OFFSET)
@@ -54,10 +46,17 @@
 (defn get-and-inc-id []
   (wcar* (car/incr "next-key")))
 
+(defn set-number-visits [short-url visits]
+  (wcar* (car/hset (str "url:" short-url) "visits" visits)))
+
+(defn set-short-url [short-url long-url]
+  (wcar* (car/hset (str "url:" short-url) "name" long-url))
+  (wcar* (car/hset "urls" long-url short-url)))
+
 (defn persist-url [short-url long-url]
   (dosync
-    (wcar* (car/hset (str "url:" short-url) "name" long-url))
-    (wcar* (car/hset "urls" long-url short-url))))
+    (set-number-visits short-url 1)
+    (set-short-url short-url long-url)))
 
 (defn register-url [long-url]
   (let [id (get-and-inc-id)
@@ -68,8 +67,20 @@
 (defn retrieve-url [short-url]
   (wcar* (car/hget (str "url:" short-url) "name")))
 
+(defn parse-int [s]
+  (Integer/parseInt (re-find #"\A-?\d+" s)))
+
+(defn update-url [short-url]
+  (dosync
+    (let [visits (wcar* (car/hget (str "url:" short-url) "visits"))]
+      (set-number-visits short-url (inc (parse-int visits)))))
+  short-url)
+
+(defn retrieve-short-from-long-url [url]
+  (wcar* (car/hget "urls" url)))
+
 (defn shorten [long-url]
-  (let [persisted-url (wcar* (car/hget "urls" long-url))]
+  (let [persisted-url (retrieve-short-from-long-url long-url)]
     (if (nil? persisted-url)
         (register-url long-url)
-        persisted-url)))
+        (update-url persisted-url))))

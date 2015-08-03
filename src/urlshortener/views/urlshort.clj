@@ -6,8 +6,8 @@
             [hiccup.page :refer :all]
             [hiccup.bootstrap.page :refer :all]))
 
-(defn shout-form []
-  [:div {:id "url-shortener-form" :class "sixteen columns alpha omega"}
+(defn shorten-form []
+  [:div {:id "url-shortener-form"}
    (form/form-to [:post "/"]
                  (form/label "url" "What url do you want to shorten?")
                  (form/text-area "url")
@@ -15,7 +15,7 @@
 
 (defn index []
   (layout/common "URLSHORTENER"
-                 (shout-form)
+                 (shorten-form)
                  [:div {:class "clear"}]
                  ))
 
